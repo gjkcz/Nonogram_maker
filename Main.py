@@ -23,49 +23,64 @@ def horizontal_hint():
     global picture
     global hint_x
     global x_max
-    index = -1
+    row_x = []
+    n = 0
+    index = 0
+    pos = 0
     for i in picture:
-        if i.count(0) > 0 and i.count(1) > 0:
-            b = i.index(0)
-            row_x = [sum(i[:b]), sum(i[b:])]
-            row_x = row_x[::-1]                 # reverse the order of row_x,
-            row_x.insert(0, '|')                # add '|' to the beginning of row_x,
-            row_x = row_x[::-1]                 # reverse back the order of row_x
-            if x_max == -1:                     # x_max = number of characters in longest row_x
-               x_max = len(row_x)
-            else:
-               if len(row_x) > x_max:
-                   x_max = len(row_x)
-            hint_x.append(row_x)
-        else:
-            if i.count(1) > 1:
-                row_x = [i.count(1)]
-                row_x.insert(1, '|')               # add '|' to the end of row_x
-                hint_x.append(row_x)
-                if x_max == -1:
-                    x_max = len(row_x)
-                else:
-                    if len(row_x) > x_max:
-                      x_max = len(row_x)
-            else:
-                row_x = [' ']
-                row_x.insert(1, '|')
-                hint_x.append(row_x)
+        if 1 in picture[index] and 0 in picture[index]:
+            row_x.clear()
+            for l in picture[index]:
+                if picture[index][pos] == 0:
+                    row_x.append(n)
+                    if n != 0:
+                        row_x.append(0)
+                    n = 0
+                    pos += 1
+                elif picture[index][pos] == 1:
+                    n += 1
+                    pos += 1
+                if pos == x and n != 0:
+                    row_x.append(n)
+            row_x.append('|')
+            hint_x.append(row_x[:])
+            pos = 0
+            index += 1
+        elif 1 in picture[index] and 0 not in picture[index]:
+            row_x.clear()
+            row_x.append(i.count(1))
+            row_x.append('|')
+            hint_x.append(row_x[:])
+            index += 1
+        elif 1 not in picture[index] and 0 in picture[index]:
+            row_x.clear()
+            row_x.append(' ')
+            row_x.append('|')
+            hint_x.append(row_x[:])
+            index += 1
 
+    index = 0
+    for i in hint_x:  # remove zeros from list
+        if 0 in hint_x[index]:  #
+            while 0 in hint_x[index]:  #
+                hint_x[index].remove(0)  #
+        index += 1
+
+    index = 0  # x_max = number of characters in longest row_x
+    for i in hint_x:  #
+        if x_max < len(hint_x[index]):  #
+            x_max = len(hint_x[index])  #
+        index += 1  #
     x_max = (2 * x_max) - 1
 
     index = 0
     for i in hint_x:
         for n in hint_x[index]:
             if len(hint_x[index]) * 2 - 1 < x_max:
-                number = (x_max - (len(hint_x[index])) - 2)
-                print(number)
-                hint_x[index].insert(0, (number * ' '))
+                hint_x[index].insert(0, ((x_max - (len(hint_x[index])) - 2) * ' '))
         index += 1
 
     hint_x = [' '.join([str(c) for c in lst]) for lst in hint_x]
-
-    # print(*hint_x, sep="\n")
 
 
 def vertical_hint():
@@ -112,10 +127,11 @@ def vertical_hint():
 
     hint_y = map(list, zip(*hint_y))
 
-    # index = 0
-    # for n in hint_y:
-    #     hint_y[index].insert(0, (x_max * ' '))
-    #     index += 1
+    index = 0
+
+    for n in hint_y:
+        hint_y[index].insert(0, (x_max * ' '))
+        index += 1
 
     hint_y = [' '.join([str(c) for c in lst]) for lst in hint_y]
 
@@ -129,7 +145,7 @@ y_max = -1
 x = int(input('width? '))                    # input the dimensions of the picture
 y = int(input('height? '))
 pic()
-# horizontal_hint()
-vertical_hint()
-print(*hint_y, sep="\n")
-# print(*hint_x, sep="\n")
+horizontal_hint()
+# vertical_hint()
+# print(*hint_y, sep="\n")
+print(*hint_x, sep="\n")
