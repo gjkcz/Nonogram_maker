@@ -2,20 +2,33 @@ import numpy as np
 from PIL import Image
 import os.path
 
-def name():
+
+def path_name():
     global name
     global type
     global filename
     global new_filename
-    global folder_path
-    global path
+    global hint_name
+    global img_path
+    global new_folder_path
+    global main_path
+    global new_img_path
+    global hint_path
     name, type = input("name? ").split(".")
     name = str(name)
     type = str(type)
     filename = (name + "." + type)
     new_filename = (name + "_nonogram." + type)
-    folder_path = "D:/nonogram/"
-    path = os.path.join(folder_path, filename)
+    hint_name = (name + "_hint.txt")
+    # where is original image
+    img_path = os.path.join(main_path, "IMG", filename)
+    # folder for new image + hint
+    new_folder_path = os.path.join(main_path, name)
+    if not os.path.exists(new_folder_path):
+        os.makedirs(new_folder_path)
+    new_img_path = os.path.join(new_folder_path, new_filename)
+    hint_path = os.path.join(new_folder_path, hint_name)
+
 
 def pic():
     global picture                                                                       # nonogram picture (in 1 and 0)
@@ -31,22 +44,32 @@ def pic():
     rotate_pic = list(map(list, zip(*picture)))                                              # rotate picture 90 degrees
     # print(*rotate_pic, sep="\n")
 
+
 def resize():
     global img
     global res_x
     global y
-    # y = int((img.size[1]/(img.size[0]/res_x)))
-    img = img.resize((res_x, y))
+    global x
+    print("width= " + str(img.size[0]))
+    res_x = int(input("res_x? "))
+    if res_x == 0:
+        x = int(img.size[0])
+        y = int(img.size[1])
+    else:
+        y = int((img.size[1] / (img.size[0] / res_x)))
+        x = res_x
+        img = img.resize((res_x, y))
+
 
 def baw_pic():
     global img
     global baw
-    global new_filename
-    global folder_path
+    global new_img_path
     baw = img.point(lambda x: 0 if x<128 else 255, '1')
-    new_path = os.path.join(folder_path + new_filename)
-    baw.save(new_path)
+    baw = baw.crop(baw.getbbox())
+    baw.save(new_img_path)
     baw.show()
+
 
 def baw_to_array():
     global res_x
@@ -54,6 +77,8 @@ def baw_to_array():
     global x
     global picture
     global rotate_pic
+    x = int(baw.size[0])
+    y = int(baw.size[1])
     img_data = baw.getdata(0)
     img_list = np.asarray(img_data, dtype=int)
     img_list = img_list.reshape((y, x))
@@ -63,10 +88,12 @@ def baw_to_array():
     picture = img_list.tolist()
     rotate_pic = list(map(list, zip(*picture)))
 
+
 def horizontal_hint():
     global picture
     global hint_x
     global x_max
+    x_max = -1
     row_x = []
     n = 0
     index = 0
@@ -124,6 +151,7 @@ def horizontal_hint():
                     hint_x[i].insert(0, ' ')
 
     hint_x = [' '.join([str(c) for c in lst]) for lst in hint_x]
+
 
 def vertical_hint():
     global rotate_pic
@@ -189,32 +217,27 @@ def vertical_hint():
 
     hint_y = [' '.join([str(c) for c in lst]) for lst in hint_y]
 
+
 while True:
+    main_path = "D:\\nonogram"
     picture = []
     rotate_pic = []
     hint_x = []
     hint_y = []
-    x_max = -1
-    name()
-    img = Image.open(path).convert("L")  # open picture and make it grayscale
-    res_x = int(input("res_x? "))
-    if res_x == 0:
-        x = int(img.size[0])
-        y = int(img.size[1])
-    else:
-        y = int((img.size[1] / (img.size[0] / res_x)))
-        x = res_x
-        resize()
+    path_name()
+    img = Image.open(img_path).convert("L")  # open picture and make it grayscale
+    resize()
     baw_pic()
     baw_to_array()
-
     # pic()
-    # rotate_pic = list(map(list, zip(*picture)))
     horizontal_hint()
     vertical_hint()
-    print('Nonogram''\n')
     print(*hint_y, sep='\n')
     print(*hint_x, sep='|' + x * '_|' + '\n', end='|' + x * '_|')
+    file = open(hint_path, "w+")
+    print(*hint_y, sep='\n', file=file)
+    file = open(hint_path, "a")
+    print(*hint_x, sep='|' + x * '_|' + '\n', end='|' + x * '_|', file=file)
     question = input('\n\n' + "Pro zadani noveho nonogramu stisknete y""\n"
                               "Pro ukonceni stisknete jakoukoli jinou klavesu""\n")
     if question == 'y' or question == 'Y':
