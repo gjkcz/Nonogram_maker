@@ -2,51 +2,57 @@ import numpy as np
 from PIL import Image
 import os.path
 
-def name():
+
+def path_name():
     global name
     global type
     global filename
     global new_filename
-    global folder_path
-    global path
-    name, type = input("name? ").split(".")
-    name = str(name)
-    type = str(type)
-    filename = (name + "." + type)
-    new_filename = (name + "_nonogram." + type)
-    folder_path = "D:/nonogram/"
-    path = os.path.join(folder_path, filename)
+    global hint_name
+    global img_path
+    global new_folder_path
+    global main_path
+    global new_img_path
+    global hint_path
+    filename = input("name? ")
+    name, type = filename.split(".")
+    new_filename = (name + "_nonogram." + type)  # new_filename = name of new (b&w, pixelated) image
+    hint_name = (name + "_hint.txt")  # hint_name = name of hint for nonogram
 
-def pic():
-    global picture                                                                       # nonogram picture (in 1 and 0)
-    global y
-    global rotate_pic
-    line1 = []
-    for i in range(0, y):
-        # line1 = [int(n) for n in input('line {} '.format(i+1)).split()]
-        line1 = list(map(int, input('line {} '.format(i+1)).split()))
-        picture.append(line1)
-    print(*picture, sep="\n")
+    main_path = os.path.dirname(__file__)
+    img_path = os.path.join(main_path, "_IMG", filename)  # img_path = path to original image
+    if not os.path.exists(img_path):
+        print("Tento soubor neexistuje, zadejte jiny nazev")
+        path_name()
+    new_folder_path = os.path.join(main_path, name)  # new_folder_path = path to the specific nonogram folder
+    if not os.path.exists(new_folder_path):
+        os.makedirs(new_folder_path)
+    new_img_path = os.path.join(new_folder_path, new_filename)  # new_img_path = path to the new image
+    hint_path = os.path.join(new_folder_path, hint_name)  # hint_path = path to nonogram hint
 
-    rotate_pic = list(map(list, zip(*picture)))                                              # rotate picture 90 degrees
-    # print(*rotate_pic, sep="\n")
 
 def resize():
     global img
     global res_x
     global y
-    # y = int((img.size[1]/(img.size[0]/res_x)))
-    img = img.resize((res_x, y))
+    global x
+    print("width= " + str(img.size[0]))
+    res_x = int(input("res_x? "))
+    if res_x != 0:
+        y = int((img.size[1] / (img.size[0] / res_x)))
+        x = res_x
+        img = img.resize((res_x, y))
+
 
 def baw_pic():
     global img
     global baw
-    global new_filename
-    global folder_path
+    global new_img_path
     baw = img.point(lambda x: 0 if x<128 else 255, '1')
-    new_path = os.path.join(folder_path + new_filename)
-    baw.save(new_path)
+    # baw = baw.crop(baw.getbbox())
+    baw.save(new_img_path)
     baw.show()
+
 
 def baw_to_array():
     global res_x
@@ -54,19 +60,24 @@ def baw_to_array():
     global x
     global picture
     global rotate_pic
+    x = int(baw.size[0])
+    y = int(baw.size[1])
     img_data = baw.getdata(0)
     img_list = np.asarray(img_data, dtype=int)
     img_list = img_list.reshape((y, x))
-    print(baw.size)
     img_list[img_list == 0] = 1
     img_list[img_list == 255] = 0
     picture = img_list.tolist()
     rotate_pic = list(map(list, zip(*picture)))
 
+
 def horizontal_hint():
     global picture
     global hint_x
     global x_max
+    global more_digits
+    x_max = -1
+    more_digits = 0
     row_x = []
     n = 0
     index = 0
@@ -81,7 +92,7 @@ def horizontal_hint():
                         row_x.append(0)
                     n = 0
                     pos += 1
-                elif picture[i][l] == 1:
+                else:
                     n += 1
                     pos += 1
                 if pos == x and n != 0:
@@ -103,14 +114,16 @@ def horizontal_hint():
             hint_x.append(row_x[:])
             index += 1
 
+    # remove zeros from list
     index = 0
-    for i in range(len(hint_x)):                                                                # remove zeros from list
+    for i in range(len(hint_x)):
         if 0 in hint_x[i]:
             while 0 in hint_x[i]:
                 hint_x[i].remove(0)
         index += 1
 
-    index = 0                                                            # x_max = number of characters in longest row_x
+    # x_max = number of characters in longest row_x
+    index = 0
     for i in range(len(hint_x)):
         if x_max < len(hint_x[i]):
             x_max = len(hint_x[i])
@@ -120,10 +133,11 @@ def horizontal_hint():
         for j in hint_x[i]:
             n = x_max - len(hint_x[i])
             if len(hint_x[i]) < x_max:
-                for k in range (n):
+                for k in range(n):
                     hint_x[i].insert(0, ' ')
 
     hint_x = [' '.join([str(c) for c in lst]) for lst in hint_x]
+
 
 def vertical_hint():
     global rotate_pic
@@ -145,13 +159,12 @@ def vertical_hint():
                         row_y.append(0)
                     n = 0
                     pos += 1
-                elif rotate_pic[i][l] == 1:
+                else:
                     n += 1
                     pos += 1
                 if pos == y and n != 0:
                     row_y.append(n)
                     n = 0
-            # row_y.append('_')
             hint_y.append(row_y[:])
             pos = 0
         elif 1 in rotate_pic[i] and 0 not in rotate_pic[i]:
@@ -189,32 +202,27 @@ def vertical_hint():
 
     hint_y = [' '.join([str(c) for c in lst]) for lst in hint_y]
 
+
 while True:
     picture = []
     rotate_pic = []
     hint_x = []
     hint_y = []
-    x_max = -1
-    name()
-    img = Image.open(path).convert("L")  # open picture and make it grayscale
-    res_x = int(input("res_x? "))
-    if res_x == 0:
-        x = int(img.size[0])
-        y = int(img.size[1])
-    else:
-        y = int((img.size[1] / (img.size[0] / res_x)))
-        x = res_x
-        resize()
+    path_name()
+    img = Image.open(img_path).convert("L")  # open picture and make it grayscale
+    resize()
     baw_pic()
     baw_to_array()
-
-    # pic()
-    # rotate_pic = list(map(list, zip(*picture)))
     horizontal_hint()
     vertical_hint()
-    print('Nonogram''\n')
     print(*hint_y, sep='\n')
     print(*hint_x, sep='|' + x * '_|' + '\n', end='|' + x * '_|')
+
+    file = open(hint_path, "a")
+    print(*hint_y, sep='\n', file=file)
+    print(*hint_x, sep='|' + x * '_|' + '\n', end='|' + x * '_|', file=file)
+    file.close()
+
     question = input('\n\n' + "Pro zadani noveho nonogramu stisknete y""\n"
                               "Pro ukonceni stisknete jakoukoli jinou klavesu""\n")
     if question == 'y' or question == 'Y':
