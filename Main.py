@@ -1,8 +1,11 @@
-# |\   | |̄̄̄| |\   | |̄̄̄| |̄̄̄| |̄̄\ |̄̄̄| |\    /|      |\    /| |̄̄̄| |  / |̄̄̄ |̄̄\
-# | \  | |   | | \  | |   | |  _  |__| |   | | \  / |      | \  / | |   | |_/  |___ |__|
-# |  \ | |   | |  \ | |   | |   | | \  |̄̄̄| |  \/  |      |  \/  | |̄̄̄| | \  |    | \
-# |   \| |___| |   \| |___| |___| |  \ |   | |      |      |      | |   | |  \ |___ |  \
-
+#############################################################################################
+#                                                                                           #
+#   |\   | |---| |\   | |---| |---| |--\ |---| |\    /|      |\    /| |---| |  / |--- |--\  #
+#   | \  | |   | | \  | |   | |  _  |__| |   | | \  / |      | \  / | |   | |_/  |___ |__|  #
+#   |  \ | |   | |  \ | |   | |   | | \  |---| |  \/  |      |  \/  | |---| | \  |    | \   #
+#   |   \| |___| |   \| |___| |___| |  \ |   | |      |      |      | |   | |  \ |___ |  \  #
+#                                                                                           #
+#############################################################################################
 
 
 
@@ -10,10 +13,12 @@ def pic():
     global picture                                                                       # nonogram picture (in 1 and 0)
     global y
     global rotate_pic
+    line1 = []
     for i in range(0, y):
-        line1 = [int(n) for n in input('line {} '.format(i+1)).split()]
+        # line1 = [int(n) for n in input('line {} '.format(i+1)).split()]
+        line1 = list(map(int, input('line {} '.format(i+1)).split()))
         picture.append(line1)
-    # print(*picture, sep="\n")
+    print(*picture, sep="\n")
 
     rotate_pic = list(map(list, zip(*picture)))                                              # rotate picture 90 degrees
     # print(*rotate_pic, sep="\n")
@@ -43,19 +48,19 @@ def horizontal_hint():
                 if pos == x and n != 0:
                     row_x.append(n)
                     n = 0
-            row_x.append('|')
+            # row_x.append('|')
             hint_x.append(row_x[:])
             pos = 0
         elif 1 in picture[i] and 0 not in picture[i]:
             row_x.clear()
             row_x.append(picture[i].count(1))
-            row_x.append('|')
+            # row_x.append('|')
             hint_x.append(row_x[:])
             index += 1
         elif 1 not in picture[i] and 0 in picture[i]:
             row_x.clear()
             row_x.append(' ')
-            row_x.append('|')
+            # row_x.append('|')
             hint_x.append(row_x[:])
             index += 1
 
@@ -108,18 +113,18 @@ def vertical_hint():
                 if pos == y and n != 0:
                     row_y.append(n)
                     n = 0
-            row_y.append('_')
+            # row_y.append('_')
             hint_y.append(row_y[:])
             pos = 0
         elif 1 in rotate_pic[i] and 0 not in rotate_pic[i]:
             row_y.clear()
             row_y.append(rotate_pic[i].count(1))
-            row_y.append('_')
+            # row_y.append('_')
             hint_y.append(row_y[:])
         elif 1 not in rotate_pic[i] and 0 in rotate_pic[i]:
             row_y.clear()
             row_y.append(' ')
-            row_y.append('_')
+            # row_y.append('_')
             hint_y.append(row_y[:])
 
     for i in range(len(hint_y)):                                                                # remove zeros from list
@@ -140,22 +145,31 @@ def vertical_hint():
 
     hint_y = list(map(list, zip(*hint_y)))
 
-    # for m in range(len(hint_y)):                                                   # add  x_max * ' ' to the beginning
-    #     for n in hint_y[m]:
-    #             hint_y[m].insert(0, (x_max * 2 - 1) * ' ')
+    for m in range(len(hint_y)):                                                   # add  x_max * ' ' to the beginning
+        for n in range(x_max):
+                hint_y[m].insert(0, ' ')
 
     hint_y = [' '.join([str(c) for c in lst]) for lst in hint_y]
 
-
-picture = []
-rotate_pic = []
-hint_x = []
-hint_y = []
-x_max = -1
-x = int(input('width? '))                                                          # input the dimensions of the picture
-y = int(input('height? '))
-pic()
-horizontal_hint()
-vertical_hint()
-print(*hint_y, sep="\n")
-print(*hint_x, sep="\n")
+while True:
+    # picture = cherries
+    picture = []
+    rotate_pic = []
+    hint_x = []
+    hint_y = []
+    x_max = -1
+    x = int(input('width? '))                                                          # input the dimensions of the picture
+    y = int(input('height? '))
+    pic()
+    rotate_pic = list(map(list, zip(*picture)))
+    horizontal_hint()
+    vertical_hint()
+    print('Nonogram''\n')
+    print(*hint_y, sep='\n')
+    print(*hint_x, sep='|' + x * '_|' + '\n', end='|' + x * '_|')
+    question = input('\n\n' + "Pro zadani noveho nonogramu stisknete y""\n"
+                              "Pro ukonceni stisknete jakoukoli jinou klavesu""\n")
+    if question == 'y' or question == 'Y':
+        continue
+    else:
+        exit()
