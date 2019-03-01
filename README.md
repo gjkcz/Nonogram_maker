@@ -1,5 +1,10 @@
 # Nonogram_maker
---WORK IN PROGRESS--
+
+Generátor nonogramů vytvořený jako maturitní práce z informatiky na [GJK](https://gjk.cz/)
+
+- Anotaci (.pdf) můžete najít [zde]()
+- Aktuální verzi programu (.exe) si můžete stáhnout [zde]()
+- Zdrojový kód (.py) najdete [zde]()
 
 <pre>
                   4     3                  

@@ -57,16 +57,19 @@ class App(QWidget):
         global main_path
         global new_img_path
         global hint_path
+        global orig_path
+        global hint_path_ii
         main_path = os.path.dirname(__file__)
         cesta = os.path.join(main_path, "_IMG")
+        nonogram = os.path.join(main_path, "_NONOGRAM")
         if not os.path.exists(cesta):
             os.makedirs(cesta)
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getOpenFileName(self, "Zvolte výchozí obrázek", cesta,
+        orig_path, _ = QFileDialog.getOpenFileName(self, "Zvolte výchozí obrázek", cesta,
                                                   "Images (*.png *.jpg *.bmp)", options=options)
-        if filename:
-            _, filename = os.path.split(filename)
+        if orig_path:
+            _, filename = os.path.split(orig_path)
             name, type = filename.split(".")
 
             # ▼new_filename = name of new (b&w, pixelated) image
@@ -76,10 +79,10 @@ class App(QWidget):
             hint_name = (name + "_hint.txt")
 
             # ▼img_path = path to original image
-            img_path = os.path.join(main_path, "_IMG", filename)
+            # img_path = os.path.join(main_path, "_IMG", filename)
 
             # ▼new_folder_path = path to the specific nonogram folder
-            new_folder_path = os.path.join(main_path, name)
+            new_folder_path = os.path.join(nonogram, name)
             if not os.path.exists(new_folder_path):
                 os.makedirs(new_folder_path)
 
@@ -95,10 +98,10 @@ class App(QWidget):
         global y
         global x
         # ▼open picture and make it grayscale
-        img = Image.open(img_path).convert("L")
+        img = Image.open(orig_path).convert("L")
         text = "Obrázek má rozlišení " + str(img.size[0]) + "x" + str(img.size[1]) + "px. Přejete si změnit?" + "\n"\
                + "Zadejte požadovanou hodnotu x"
-        res_x, okpressed = QInputDialog.getInt(self, "Nonogram_maker", text, 0, 0, 100, 1)
+        res_x, okpressed = QInputDialog.getInt(self, "Nonogram_maker", text, 0, -2147483647, 2147483647, 1)
         if okpressed and res_x != 0:
             y = int((img.size[1] / (img.size[0] / res_x)))
             x = res_x
@@ -173,11 +176,11 @@ class App(QWidget):
         # ▼x_max = number of characters in longest row_x
         for i in range(len(hint_x)):
             for k in range(len(hint_x[i])):
-                if (hint_x[i][k]) < 10:
+                if (hint_x[i][k]) in range(1, 9):
                     qx_max += 2
-                if (hint_x[i][k]) >= 10 and (hint_x[i][k]) < 100:
+                if (hint_x[i][k]) in range(10, 99) and (hint_x[i][k]) < 100:
                     qx_max += 3
-                if (hint_x[i][k]) >= 100:
+                if (hint_x[i][k]) in range(100, 9999):
                     qx_max += 4
             if x_max < qx_max:
                 x_max = qx_max
@@ -269,16 +272,16 @@ class App(QWidget):
         # hint_y = [' '.join([str(c) for c in lst]) for lst in hint_y]
 
     def print(self):
-        print((x_max + 1)* " ", end = "")
-        for i in range(len(hint_y)):
-            for j in hint_y[i]:
-                print("{:<{space}}".format(j, space=digits),end=" ")
-            if i < len(hint_y)-1:
-                print("\n", end=(x_max + 1)* " ")
-            else:
-                print("\n", end="")
-        for i in hint_x:
-            print("{:>{space}}".format(i, space=x_max) + "|" + x * (digits * "_" + "|"))
+        # print((x_max + 1)* " ", end = "")
+        # for i in range(len(hint_y)):
+        #     for j in hint_y[i]:
+        #         print("{:<{space}}".format(j, space=digits),end=" ")
+        #     if i < len(hint_y)-1:
+        #         print("\n", end=(x_max + 1)* " ")
+        #     else:
+        #         print("\n", end="")
+        # for i in hint_x:
+        #     print("{:>{space}}".format(i, space=x_max) + "|" + x * (digits * "_" + "|"))
 
         # ▼print hint to file
         file = open(hint_path, "a")
@@ -300,9 +303,9 @@ class App(QWidget):
         if question == QMessageBox.Yes:
             self.__init__()
         else:
-            exit()
+            sys.exit()
 
 
 app = QApplication(sys.argv)
 ex = App()
-sys.exit(app.exec_())
+# # sys.exit(app.exec_())
