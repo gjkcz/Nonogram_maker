@@ -37,13 +37,21 @@ class App(QWidget):
         self.repeat()
 
     def gui(self):
+        qtrectangle = self.frameGeometry()
+        centerpoint = QDesktopWidget().availableGeometry().center()
+        qtrectangle.moveCenter(centerpoint)
+        self.move(qtrectangle.topLeft())
+
         self.setWindowTitle("Nonogram_maker")
         self.setWindowIcon(QIcon("kepler.png"))
         label = QLabel(self)
         pixmap = QPixmap("keplerII.png")
         label.setPixmap(pixmap)
         self.resize(pixmap.width(), pixmap.height())
-        self.setGeometry(700, 350, 546, 546)
+        # self.setGeometry(700, 350, 546, 546)
+        self.setGeometry(0, 0, 546, 546)
+        self.move(qtrectangle.topLeft())
+
         self.show()
 
     def path_name(self):
@@ -255,7 +263,9 @@ class App(QWidget):
                     digits = 1
                 elif (hint_y[i][j]) in range(10, 99) and digits < 2:
                     digits = 2
-                elif (hint_y[i][j]) in range (100, 9999) and digits < 4:
+                elif (hint_y[i][j]) in range (100, 999) and digits < 3:
+                    digits = 3
+                elif (hint_y[i][j]) in range (1000, 9999) and digits < 4:
                     digits = 4
                 n = y_max - len(hint_y[i])
                 if len(hint_y[i]) < y_max:
@@ -281,20 +291,30 @@ class App(QWidget):
         #     else:
         #         print("\n", end="")
         # for i in hint_x:
-        #     print("{:>{space}}".format(i, space=x_max) + "|" + x * (digits * "_" + "|"))
+        #     if digits <= 2:
+        #         print("{:>{space}}".format(i, space=x_max) + "|" + x * (digits * "_" + "|"))
+        #     if digits > 2:
+        #         print("{:>{space}}".format(i, space=x_max)
+        #               + "|" + x * (digits * " " + "|") + "\n"
+        #               + x_max * " " + "|" + x * (digits * "_" + "|"), end="\n")
 
         # ▼print hint to file
         file = open(hint_path, "a")
         print((x_max + 1) * " ", end="", file=file)
         for i in range(len(hint_y)):
             for j in hint_y[i]:
-                print("{:<{space}}".format(j, space=digits), end=" ", file=file)
+                print("{:>{space}}".format(j, space=digits), end=" ", file=file)
             if i < len(hint_y) - 1:
                 print("\n", end=(x_max + 1) * " ", file=file)
             else:
                 print("\n", end="", file=file)
         for i in hint_x:
-            print("{:>{space}}".format(i, space=x_max) + "|" + x * (digits * "_" + "|"),file=file)
+            if digits <= 2:
+                print("{:>{space}}".format(i, space=x_max) + "|" + x * (digits * "_" + "|"), file=file)
+            if digits > 2:
+                print("{:>{space}}".format(i, space=x_max)
+                      + "|" + x * (digits * " " + "|") + "\n"
+                      + x_max * " " + "|" + x * (digits * "_" + "|"), end="\n", file=file)
         file.close()
 
     def repeat(self):
