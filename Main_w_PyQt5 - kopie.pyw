@@ -37,13 +37,21 @@ class App(QWidget):
         self.repeat()
 
     def gui(self):
+        qtrectangle = self.frameGeometry()
+        centerpoint = QDesktopWidget().availableGeometry().center()
+        qtrectangle.moveCenter(centerpoint)
+        self.move(qtrectangle.topLeft())
+
         self.setWindowTitle("Nonogram_maker")
         self.setWindowIcon(QIcon("kepler.png"))
         label = QLabel(self)
         pixmap = QPixmap("keplerII.png")
         label.setPixmap(pixmap)
         self.resize(pixmap.width(), pixmap.height())
-        self.setGeometry(700, 350, 546, 546)
+        # self.setGeometry(700, 350, 546, 546)
+        self.setGeometry(0, 0, 546, 546)
+        self.move(qtrectangle.topLeft())
+
         self.show()
 
     def path_name(self):
