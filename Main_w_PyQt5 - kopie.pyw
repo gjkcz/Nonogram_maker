@@ -55,6 +55,7 @@ class App(QWidget):
         self.show()
 
     def path_name(self):
+        global dither
         global name
         global type
         global filename
@@ -67,6 +68,13 @@ class App(QWidget):
         global hint_path
         global orig_path
         global hint_path_ii
+        question = QMessageBox.question(self, 'Nonogram_maker', "Chcete použít stínování?",
+                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if question == QMessageBox.Yes:
+            dither = 1
+        else:
+            dither = 0
+
         main_path = os.path.dirname(__file__)
         cesta = os.path.join(main_path, "_IMG")
         nonogram = os.path.join(main_path, "_NONOGRAM")
@@ -119,9 +127,16 @@ class App(QWidget):
         global img
         global baw
         global new_img_path
-        baw = img.point(lambda x: 0 if x < 128 else 255, '1')
+        global dither
         # baw = baw.crop(baw.getbbox())
+        if dither == 1:
+            baw = img.convert("1") #, dither =Image.NONE)
+        else:
+            #baw = img.point(lambda x: 0 if x < 128 else 255, '1')
+            baw = img.convert("1", dither =Image.NONE)
+        # baw.show()
         baw.save(new_img_path)
+
 
     def baw_to_array(self):
         global res_x
