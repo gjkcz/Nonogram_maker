@@ -2,9 +2,10 @@
 
 Generátor nonogramů vytvořený jako maturitní práce z informatiky na [GJK](https://gjk.cz/)
 
-- Anotaci (.pdf) můžete najít [zde]()
-- Aktuální verzi programu (.exe) si můžete stáhnout [zde]()
-- Zdrojový kód (.py) najdete [zde]()
+- Anotaci (.pdf) si [přečtete zde](https://github.com/xvrat01/Nonogram_maker/blob/master/Anotace.pdf)
+- Aktuální verzi programu (.exe) naleznete na [tomto odkazu](https://github.com/xvrat01/Nonogram_maker/blob/master/exe.zip)
+- Zdrojový kód (.py) si můžete [stáhnout zde](https://github.com/xvrat01/Nonogram_maker/blob/master/py.zip)
+- Ukázky výstupu programu můžete najít v [této složce](https://github.com/xvrat01/Nonogram_maker/tree/master/_NONOGRAM)
 
 <pre>
                   4     3                  
